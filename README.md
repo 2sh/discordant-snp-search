@@ -1,9 +1,9 @@
 # Discordant SNP Search
 This script searches for discordant SNPs between child and parent 23andMe genome files. The SNPs that this script flags up may possibly come from miscalls, mutations or microdeletions.
 
-The gender passed to script to take into account that the Y-chromosome is only passed from father to son, the MT DNA from mother to child, and the X-chromosome from both parents to daughter or from mother to son.
+The gender is passed to the script to take into account that the Y-chromosome is only passed from father to son, the MT DNA from mother to child, and the X-chromosome from both parents to daughter or from mother to son.
 
-The script will only work between two 23andMe files of the same version and have the same number of lines which they should have if the data set "All DNA" was chosen.
+The script will only work between two 23andMe files of the same version. They also need to have the same number of lines which they should have if the download option "Data set" was set the same for both of them (e.g. "All DNA").
 
 ##Requirements
 * Python3
