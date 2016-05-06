@@ -26,7 +26,7 @@ python dss.py 23andme_daughter_v4.txt F 23andme_mother_v4.txt F 23andme_father_v
 ```
 
 ##Output Example
-The output SNPs are ordered: child, parent 1, parent2.
+The output SNPs are ordered: child, parent 1, parent 2.
 ###Output if single parent input
 ```
 rs10942597	5	89807395	CC	TT
