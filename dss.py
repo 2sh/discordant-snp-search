@@ -19,42 +19,70 @@
 import sys
 import csv
 
+def create_reader(file_name):
+	return csv.reader(open(file_name, "r"), delimiter="\t", quoting=csv.QUOTE_NONE)
+
 def is_male(string):
 	string = string.upper()
 	if string == "M":
 		return True
 	elif string == "F":
 		return False
-	raise Exception("Specified gender incorrect. Needs to be either M or F")
+	raise Exception("Specified gender incorrect. Needs to be either M or F.")
 
+parents = []
+parents_are_male = []
 try:
-	child_reader = csv.reader(open(sys.argv[1], "r"), delimiter="\t", quoting=csv.QUOTE_NONE)
-	parent_reader = csv.reader(open(sys.argv[2], "r"), delimiter="\t", quoting=csv.QUOTE_NONE)
+	child = create_reader(sys.argv[1])
+	child_is_male = is_male(sys.argv[2])
 	
-	child_is_male = is_male(sys.argv[3])
-	parent_is_male = is_male(sys.argv[4])
+	for file_name, gender in zip(sys.argv[3::2], sys.argv[4::2]):
+		parents.append(create_reader(file_name))
+		parents_are_male.append(is_male(gender))
 except IndexError as e:
-	print("Arguments: <CHILD_FILE> <PARENT_FILE> <CHILD_GENDER:M/F> <PARENT_GENDER:M/F>")
+	print("Arguments: <CHILD_FILE> <CHILD_GENDER:M/F> <PARENT_1_FILE> <PARENT_1_GENDER:M/F> [<PARENT_2_FILE> <PARENT_2_GENDER:M/F>]")
 	exit()
 except Exception as e:
 	print(e)
 	exit()
+	
+is_both_parents = len(parents)>1
 
-for c_line, p_line in zip(child_reader, parent_reader):
-	if c_line[0][0] == "#":
+for child_line, parent_lines in zip(child, zip(*parents)):
+	if child_line[0][0] == "#" or child_line[3] == "--":
 		continue
 	
-	if c_line[3] == "--" or p_line[3] == "--":
-		continue
-	
-	if parent_is_male:
-		if child_is_male and c_line[1] == "X":
+	parents_are_found = []
+	parent_skipped = False
+	for parent_line, parent_is_male in zip(parent_lines, parents_are_male):
+		parents_are_found.append(False)
+		if parent_line[3] == "--":
+			parent_skipped = True
 			continue
-		if c_line[1] == "MT":
-			continue
+		
+		if parent_is_male:
+			if child_is_male and child_line[1] == "X":
+				parent_skipped = True
+				continue
+			if child_line[1] == "MT":
+				parent_skipped = True
+				continue
 	
-	for letter in c_line[3]:
-		if letter in p_line[3]:
-			break
-	else:
-		print("{}\t{}\t{}\t{}!{}".format(c_line[0], c_line[1], c_line[2], c_line[3], p_line[3]))
+		for letter in child_line[3]:
+			if letter in parent_line[3]:
+				break
+		else:
+			parents_are_found[-1] = True
+			
+	if any(parents_are_found):
+		child_is_found = all(parents_are_found)
+		snp = []
+		for parent_line, parent_is_found in zip(parent_lines, parents_are_found):
+			snp.append(parent_line[3] +
+				("!" if not child_is_found and not parent_skipped and parent_is_found else ""))
+		print("{}\t{}\t{}\t{}\t{}".format(
+			child_line[0],
+			child_line[1],
+			child_line[2],
+			child_line[3] + ("!" if child_is_found and is_both_parents else ""),
+			"\t".join(snp)))
