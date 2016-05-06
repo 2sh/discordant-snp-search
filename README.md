@@ -12,7 +12,7 @@ The script will only work between two 23andMe files of the same version. They al
 ```
 python dss.py <CHILD_FILE> <CHILD_GENDER:M/F> <PARENT_1_FILE> <PARENT_1_GENDER:M/F> [<PARENT_2_FILE> <PARENT_2_GENDER:M/F>]
 ```
-Input of a second parent is optional. Gender is given as "M" for male and "F" for female.
+Input of the second parent is optional. Gender is given as "M" for male and "F" for female.
 
 ##Usage Example
 ###Single parent input
