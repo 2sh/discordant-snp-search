@@ -45,15 +45,18 @@ except IndexError as e:
 except Exception as e:
 	print(e)
 	exit()
-	
+
 is_both_parents = len(parents)>1
 
 for child_line, parent_lines in zip(child, zip(*parents)):
 	if child_line[0][0] == "#" or child_line[3] == "--":
 		continue
 	
+	child_letters = list(child_line[3])
+	
 	parents_are_found = []
 	parent_skipped = False
+	all_matched = False
 	for parent_line, parent_is_male in zip(parent_lines, parents_are_male):
 		parents_are_found.append(False)
 		if parent_line[3] == "--":
@@ -67,22 +70,29 @@ for child_line, parent_lines in zip(child, zip(*parents)):
 			if child_line[1] == "MT":
 				parent_skipped = True
 				continue
-	
-		for letter in child_line[3]:
-			if letter in parent_line[3]:
-				break
+		
+		matches = [letter in parent_line[3] for letter in child_letters]
+		if all(matches):
+			all_matched = True
 		else:
-			parents_are_found[-1] = True
-			
-	if any(parents_are_found):
-		child_is_found = all(parents_are_found)
-		snp = []
+			for i, match in enumerate(matches):
+				if match:
+					del child_letters[i]
+					break
+			else:
+				parents_are_found[-1] = True
+	
+	child_is_found = is_both_parents and not parent_skipped and not all_matched and child_letters
+	
+	if any(parents_are_found) or child_is_found:
+		if all(parents_are_found):
+			child_is_found = True
+		parent_letters = []
 		for parent_line, parent_is_found in zip(parent_lines, parents_are_found):
-			snp.append(parent_line[3] +
-				("!" if not child_is_found and not parent_skipped and parent_is_found else ""))
+			parent_letters.append(parent_line[3] + ("!" if not child_is_found and not parent_skipped and parent_is_found else ""))
 		print("{}\t{}\t{}\t{}\t{}".format(
 			child_line[0],
 			child_line[1],
 			child_line[2],
 			child_line[3] + ("!" if child_is_found and is_both_parents else ""),
-			"\t".join(snp)))
+			"\t".join(parent_letters)))
